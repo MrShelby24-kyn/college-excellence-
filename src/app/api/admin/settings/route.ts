@@ -40,7 +40,18 @@ export async function POST(request: Request) {
     ? await supabase.from("school_settings").update(payload).eq("id", existing.id)
     : await supabase.from("school_settings").insert(payload);
 
-  if (error) return NextResponse.json({ error: "Échec de l'enregistrement" }, { status: 500 });
+  if (error) {
+  console.error("Erreur Supabase school_settings:", error);
+
+  return NextResponse.json(
+    {
+      error: "Échec de l'enregistrement",
+      details: error.message,
+      code: error.code,
+    },
+    { status: 500 }
+  );
+}
 
   return NextResponse.json({ success: true });
 }
