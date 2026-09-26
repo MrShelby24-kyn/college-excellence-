@@ -1,4 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
+import { cache } from "react";
+import { createPublicClient } from "@/lib/supabase/public";
 import { schoolConfig } from "@/config/school";
 
 export interface SiteSettings {
@@ -41,12 +42,16 @@ function fallback(): SiteSettings {
  * Lit les réglages depuis Supabase (`school_settings`, ligne unique).
  * Si la table est vide, en erreur, ou Supabase non configuré : repli sur
  * les valeurs de config/school.ts, pour que le site reste toujours fonctionnel.
+ *
+ * Enveloppé dans React `cache()` : si Header, Footer et Hero l'appellent
+ * tous les trois sur la même page, une seule requête Supabase est faite,
+ * pas trois.
  */
-export async function getSiteSettings(): Promise<SiteSettings> {
+export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
   if (!supabaseConfigured) return fallback();
 
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase.from("school_settings").select("*").limit(1).single();
 
     if (error || !data) return fallback();
@@ -75,4 +80,4 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   } catch {
     return fallback();
   }
-}
+});

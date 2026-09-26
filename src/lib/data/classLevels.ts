@@ -1,4 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
+import { cache } from "react";
+import { createPublicClient } from "@/lib/supabase/public";
 import { schoolConfig } from "@/config/school";
 import type { ClassLevel } from "@/types/database";
 
@@ -21,11 +22,11 @@ function fallbackLevels(): ClassLevel[] {
   }));
 }
 
-export async function getClassLevels(): Promise<ClassLevel[]> {
+export const getClassLevels = cache(async (): Promise<ClassLevel[]> => {
   if (!supabaseConfigured) return fallbackLevels();
 
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("class_levels")
       .select("*")
@@ -36,4 +37,4 @@ export async function getClassLevels(): Promise<ClassLevel[]> {
   } catch {
     return fallbackLevels();
   }
-}
+});

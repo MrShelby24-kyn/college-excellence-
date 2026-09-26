@@ -5,6 +5,11 @@ import { getSiteSettings } from "@/lib/data/settings";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.excellence-divo-demo.ci";
 
+// Les pages publiques sont maintenant mises en cache et régénérées au plus
+// toutes les 60 secondes (ISR), au lieu d'être recalculées à chaque visite.
+// Une modification dans /admin apparaît donc sur le site en moins d'une minute.
+export const revalidate = 60;
+
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSiteSettings();
 

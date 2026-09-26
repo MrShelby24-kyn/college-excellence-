@@ -1,15 +1,16 @@
-import { createClient } from "@/lib/supabase/server";
+import { cache } from "react";
+import { createPublicClient } from "@/lib/supabase/public";
 import { demoGallery } from "@/lib/demo-data";
 import type { GalleryItem } from "@/types/database";
 
 const supabaseConfigured =
   !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-export async function getGalleryItems(): Promise<GalleryItem[]> {
+export const getGalleryItems = cache(async (): Promise<GalleryItem[]> => {
   if (!supabaseConfigured) return demoGallery;
 
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("gallery")
       .select("*")
@@ -27,4 +28,4 @@ export async function getGalleryItems(): Promise<GalleryItem[]> {
   } catch {
     return demoGallery;
   }
-}
+});
