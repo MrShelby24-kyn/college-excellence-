@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import type { CookieOptions } from "@supabase/ssr";
 
@@ -34,11 +35,12 @@ export async function createClient() {
 /**
  * Client "admin" avec la clé service_role.
  * NE JAMAIS importer ce fichier dans un composant client.
- * Réservé aux Route Handlers qui doivent contourner la RLS
- * (ex: écrire l'historique système, opérations d'administration).
+ * Contourne complètement la RLS : réservé aux Route Handlers serveur qui
+ * doivent écrire des données pour un visiteur non authentifié (ex: la
+ * préinscription publique) ou lire une ligne juste après l'avoir insérée
+ * (nécessaire pour récupérer le numéro de dossier généré automatiquement).
  */
 export function createAdminClient() {
-  const { createClient: createSupabaseClient } = require("@supabase/supabase-js");
   return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
